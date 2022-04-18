@@ -1,5 +1,6 @@
 package cherry.technologies.pokemonrest.domain
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.sql.Timestamp
 import java.util.*
 import javax.persistence.Entity
@@ -13,5 +14,7 @@ class Form(
     version: Long? = null,
     val name:String,
     val url:String,
-    @ManyToOne var pokemon: Pokemon? = null)
+    @ManyToOne
+    @JsonIgnore
+    var pokemon: Pokemon? = null)
     : Base(id, version, createdDate, lastModifiedDate)

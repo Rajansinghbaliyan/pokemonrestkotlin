@@ -2,6 +2,7 @@ package cherry.technologies.pokemonrest.web.services
 
 import cherry.technologies.pokemonrest.domain.Pokemon
 import cherry.technologies.pokemonrest.web.GetRestTemplate
+import cherry.technologies.pokemonrest.web.customexception.BadRequestException
 import cherry.technologies.pokemonrest.web.customexception.NotFoundException
 import cherry.technologies.pokemonrest.web.dto.PokemonDto
 import cherry.technologies.pokemonrest.web.dto.dtoToPokemon
@@ -23,17 +24,32 @@ class PokemonServices(
     private val log: Logger = Logger.getLogger(PokemonServices::class.toString())
 
     fun getSinglePokemon(id: Int): Pokemon {
-
         val result = pokemonRepositories.findByIdOrNull(id) ?: run {
-            log.info("Fetching form the API")
             val url = BASE_URL + id
-            val pokemonDto = getPokemon(restTemplate, url).body ?: throw NotFoundException("error in fetching")
+            val pokemonDto = getPokemon(restTemplate, url).body.logInfo(log,"Fetching from API")
+                ?: throw NotFoundException("error in fetching")
             saveToDb(pokemonDto.dtoToPokemon())
         }
-
-        log.info("Pokemon GET: ${result.name}")
-        return result
+        return result.logInfo(log,"GET Pokemon:${result.name}")
     }
 
-    fun saveToDb(pokemon: Pokemon) = pokemonRepositories.save(pokemon).logInfo(log,"Saved the Pokemon: ${pokemon.name}")
+
+    private fun saveToDb(pokemon: Pokemon) = with(pokemon) {
+        moves.forEach { it.pokemon = this }
+        abilities.forEach { it.pokemon = this }
+        types.forEach { it.pokemon = this }
+        stats.forEach { it.pokemon = this }
+        forms.forEach { it.pokemon = this }
+        pokemonRepositories.save(pokemon).logInfo(log, "Saved the Pokemon: ${pokemon.name}")
+    }
+
+    fun getFromRange(start:Int, end:Int) = when {
+        start < 0 -> throw BadRequestException("start can't be less than 0.")
+        start > end -> throw BadRequestException("start should be greater than end.")
+        start == end -> throw BadRequestException("start and end are equal.")
+        else -> (start..end).map {
+            getSinglePokemon(it)
+        }
+    }
+
 }
