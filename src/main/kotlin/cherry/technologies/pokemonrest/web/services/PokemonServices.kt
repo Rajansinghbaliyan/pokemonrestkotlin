@@ -26,7 +26,7 @@ class PokemonServices(
     fun getSinglePokemon(id: Int): Pokemon {
         val result = pokemonRepositories.findByIdOrNull(id) ?: run {
             val url = BASE_URL + id
-            val pokemonDto = getPokemon(restTemplate, url).body.logInfo(log,"Fetching from API")
+            val pokemonDto = getPokemon(restTemplate, url).body.logInfo(log,"Fetching from API PokemonId: $id")
                 ?: throw NotFoundException("error in fetching")
             saveToDb(pokemonDto.dtoToPokemon())
         }
@@ -47,7 +47,10 @@ class PokemonServices(
         start < 0 -> throw BadRequestException("start can't be less than 0.")
         start > end -> throw BadRequestException("start should be greater than end.")
         start == end -> throw BadRequestException("start and end are equal.")
-        else -> (start..end).map {
+        else -> (start..end)
+            .toList()
+            .parallelStream()
+            .map {
             getSinglePokemon(it)
         }
     }
