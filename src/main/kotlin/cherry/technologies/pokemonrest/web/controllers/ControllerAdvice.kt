@@ -13,22 +13,24 @@ class ControllerAdvice {
     @ExceptionHandler(value = [NotFoundException::class])
     fun notFoundHandler(e: NotFoundException) = ResponseEntity
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(e.message)
+        .body(ErrorMessage(e.message))
 
     @ExceptionHandler(value = [BadRequestException::class])
     fun badRequestHandler(e: BadRequestException) = ResponseEntity
         .badRequest()
-        .body(e.message)
+        .body(ErrorMessage(e.message))
 
     @ExceptionHandler(value = [InternalException::class])
     fun internalErrorHandler(e: InternalException) = ResponseEntity
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(e.message)
+        .body(ErrorMessage(e.message))
 
     @ExceptionHandler(value = [java.lang.Exception::class])
     fun globalExceptionHandler(e: Exception) = ResponseEntity
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(e.message)
+        .body(ErrorMessage(e.message,e.stackTraceToString()))
 
 
 }
+
+class ErrorMessage(val message:String?,val stackTrace:String? = null)
