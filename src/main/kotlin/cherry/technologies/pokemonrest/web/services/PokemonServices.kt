@@ -1,6 +1,7 @@
 package cherry.technologies.pokemonrest.web.services
 
 import cherry.technologies.pokemonrest.domain.Pokemon
+import cherry.technologies.pokemonrest.enums.Fields
 import cherry.technologies.pokemonrest.web.GetRestTemplate
 import cherry.technologies.pokemonrest.web.customexception.BadRequestException
 import cherry.technologies.pokemonrest.web.customexception.NotFoundException
@@ -9,6 +10,7 @@ import cherry.technologies.pokemonrest.web.repositories.PokemonRepositories
 import cherry.technologies.pokemonrest.web.utils.OffsetBasedPageRequest
 import cherry.technologies.pokemonrest.web.utils.getPokemon
 import cherry.technologies.pokemonrest.web.utils.logInfo
+import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.logging.Logger
@@ -57,6 +59,28 @@ class PokemonServices(
 
     fun getFromDbOnly(start: Int, limit: Int) =
         pokemonRepositories.findAll(OffsetBasedPageRequest(limit, start))
-        .logInfo(log,"Getting Pokemon form db")
+            .logInfo(log, "Getting Pokemon form db")
+
+    fun getAllSorted(start: Int, limit: Int, sort: Int, field: Fields) =
+        pokemonRepositories.findAll(
+            OffsetBasedPageRequest(
+                limit,
+                start,
+                Sort.by(
+                    when (sort) {
+                        1 -> Sort.Direction.ASC
+                        -1 -> Sort.Direction.DESC
+                        else -> throw NotFoundException("sort field can have to value 1:ASC -1:DESC")
+                    },
+                    when (field){
+                        Fields.HEIGHT -> field.value
+                        Fields.WEIGHT -> field.value
+                        Fields.BASE_EXPERIENCE -> field.value
+                    }
+                )
+            )
+        )
+
 
 }
+

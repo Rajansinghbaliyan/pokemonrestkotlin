@@ -1,14 +1,10 @@
 package cherry.technologies.pokemonrest.web.controllers
 
+import cherry.technologies.pokemonrest.enums.Fields
 import cherry.technologies.pokemonrest.web.services.PokemonServices
 import org.jetbrains.annotations.NotNull
-import org.springframework.data.domain.Page
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/pokemon")
@@ -33,4 +29,14 @@ class PokemonControllers(private val pokemonServices: PokemonServices) {
     ) = ResponseEntity
         .ok()
         .body(pokemonServices.getFromDbOnly(start, limit))
+
+    @GetMapping("/range/db/sort")
+    fun getAllSortedDb(
+        @RequestParam @NotNull start: Int,
+        @RequestParam @NotNull limit: Int,
+        @RequestParam @NotNull direction: Int,
+        @RequestParam @NotNull field:Fields
+    ) = ResponseEntity
+        .ok()
+        .body(pokemonServices.getAllSorted(start,limit,direction,field))
 }
