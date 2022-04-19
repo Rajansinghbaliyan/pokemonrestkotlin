@@ -18,8 +18,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.logging.Logger
-import java.util.stream.Collectors.counting
-import java.util.stream.Collectors.groupingBy
+import java.util.stream.Collectors.*
 
 const val BASE_URL = "https://pokeapi.co/api/v2/pokemon/"
 
@@ -106,6 +105,27 @@ class PokemonServices(
                     PokemonTypeAndName::type,
                     counting()
                 )
-            ) ?: throw NotFoundException("Database is empty")
+            )
+
+    @Transactional
+    fun getTypeAndNameOfPokemon() =
+        pokemonRepositories.streamAll()
+            .flatMap { pokemon ->
+                pokemon.pokemonToDto()
+                    .types.stream()
+                    .map {
+                        PokemonTypeAndName(it, pokemon.name)
+                            .logInfo(log, "Mapping Pokemon: ${pokemon.name}")
+                    }
+            }
+            .collect(
+                groupingBy(
+                    PokemonTypeAndName::type,
+                    mapping(
+                        { pokemonType -> pokemonType.name },
+                        toSet<String?>().logInfo(log, "Adding to Set Pokemon")
+                    )
+                )
+            )
 }
 

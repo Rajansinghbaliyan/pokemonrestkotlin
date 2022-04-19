@@ -33,6 +33,9 @@ class PokemonControllers(private val pokemonServices: PokemonServices) {
         @RequestParam @NotNull field: Fields
     ) = pokemonServices.getAllSorted(start, limit, direction, field).responseOk()
 
-    @GetMapping("/type")
+    @GetMapping("/type/count")
     fun getCountByType() = pokemonServices.getNoOfByType().responseOk()
+
+    @GetMapping("/type/name")
+    fun getTypeAndNames() = pokemonServices.getTypeAndNameOfPokemon().responseOk()
 }
