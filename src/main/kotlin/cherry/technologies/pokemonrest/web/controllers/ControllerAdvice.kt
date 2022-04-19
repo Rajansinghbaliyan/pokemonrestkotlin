@@ -3,32 +3,25 @@ package cherry.technologies.pokemonrest.web.controllers
 import cherry.technologies.pokemonrest.web.customexception.BadRequestException
 import cherry.technologies.pokemonrest.web.customexception.InternalException
 import cherry.technologies.pokemonrest.web.customexception.NotFoundException
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
+import cherry.technologies.pokemonrest.web.utils.responseBadRequest
+import cherry.technologies.pokemonrest.web.utils.responseInternalError
+import cherry.technologies.pokemonrest.web.utils.responseNotFound
 import org.springframework.web.bind.annotation.ExceptionHandler
 
 @org.springframework.web.bind.annotation.ControllerAdvice
 class ControllerAdvice {
 
     @ExceptionHandler(value = [NotFoundException::class])
-    fun notFoundHandler(e: NotFoundException) = ResponseEntity
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(ErrorMessage(e.message))
+    fun notFoundHandler(e: NotFoundException) = ErrorMessage(e.message).responseNotFound()
 
     @ExceptionHandler(value = [BadRequestException::class])
-    fun badRequestHandler(e: BadRequestException) = ResponseEntity
-        .badRequest()
-        .body(ErrorMessage(e.message))
+    fun badRequestHandler(e: BadRequestException) = ErrorMessage(e.message).responseBadRequest()
 
     @ExceptionHandler(value = [InternalException::class])
-    fun internalErrorHandler(e: InternalException) = ResponseEntity
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(ErrorMessage(e.message))
+    fun internalErrorHandler(e: InternalException) = ErrorMessage(e.message).responseInternalError()
 
     @ExceptionHandler(value = [java.lang.Exception::class])
-    fun globalExceptionHandler(e: Exception) = ResponseEntity
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(ErrorMessage(e.message,e.stackTraceToString()))
+    fun globalExceptionHandler(e: Exception) = ErrorMessage(e.message,e.stackTraceToString()).responseInternalError(e.message)
 
 
 }
