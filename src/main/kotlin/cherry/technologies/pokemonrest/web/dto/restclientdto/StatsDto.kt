@@ -1,4 +1,4 @@
-package cherry.technologies.pokemonrest.web.dto
+package cherry.technologies.pokemonrest.web.dto.restclientdto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

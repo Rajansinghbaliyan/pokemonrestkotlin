@@ -1,13 +1,12 @@
-package cherry.technologies.pokemonrest.web.dto
+package cherry.technologies.pokemonrest.web.dto.restclientdto
 
+import cherry.technologies.pokemonrest.domain.*
 import cherry.technologies.pokemonrest.domain.Ability
-import cherry.technologies.pokemonrest.domain.Form
 import cherry.technologies.pokemonrest.domain.Move
-import cherry.technologies.pokemonrest.domain.Pokemon
 import cherry.technologies.pokemonrest.domain.Stat
 import cherry.technologies.pokemonrest.domain.Type
 
-fun PokemonDto.dtoToPokemon() =
+fun PokemonRestClientDto.restClientDtoToPokemon() =
     Pokemon(
         id = id,
         name = name,

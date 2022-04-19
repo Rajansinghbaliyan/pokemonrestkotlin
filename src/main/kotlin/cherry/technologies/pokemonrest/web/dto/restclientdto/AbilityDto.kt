@@ -1,4 +1,4 @@
-package cherry.technologies.pokemonrest.web.dto
+package cherry.technologies.pokemonrest.web.dto.restclientdto
 
 data class AbilityDto(val ability: Ability)
 

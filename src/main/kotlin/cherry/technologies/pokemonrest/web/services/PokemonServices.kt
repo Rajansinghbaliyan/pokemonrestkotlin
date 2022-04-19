@@ -5,7 +5,9 @@ import cherry.technologies.pokemonrest.enums.Fields
 import cherry.technologies.pokemonrest.web.GetRestTemplate
 import cherry.technologies.pokemonrest.web.customexception.BadRequestException
 import cherry.technologies.pokemonrest.web.customexception.NotFoundException
-import cherry.technologies.pokemonrest.web.dto.dtoToPokemon
+import cherry.technologies.pokemonrest.web.dto.restclientdto.restClientDtoToPokemon
+import cherry.technologies.pokemonrest.web.dto.restdto.PokemonDto
+import cherry.technologies.pokemonrest.web.dto.restdto.pokemonToDto
 import cherry.technologies.pokemonrest.web.repositories.PokemonRepositories
 import cherry.technologies.pokemonrest.web.utils.OffsetBasedPageRequest
 import cherry.technologies.pokemonrest.web.utils.getPokemon
@@ -25,12 +27,12 @@ class PokemonServices(
     private val restTemplate = getRestTemplate.restTemplate
     private val log: Logger = Logger.getLogger(PokemonServices::class.toString())
 
-    fun getSinglePokemon(id: Int): Pokemon {
-        val result = pokemonRepositories.findByIdOrNull(id) ?: run {
+    fun getSinglePokemon(id: Int): PokemonDto {
+        val result = pokemonRepositories.findByIdOrNull(id)?.pokemonToDto() ?: run {
             val url = BASE_URL + id
             val pokemonDto = getPokemon(restTemplate, url).body.logInfo(log, "Fetching from API PokemonId: $id")
                 ?: throw NotFoundException("error in fetching")
-            saveToDb(pokemonDto.dtoToPokemon())
+            saveToDb(pokemonDto.restClientDtoToPokemon())
         }
         return result.logInfo(log, "GET Pokemon:${result.name}")
     }
@@ -42,7 +44,9 @@ class PokemonServices(
         types.forEach { it.pokemon = this }
         stats.forEach { it.pokemon = this }
         forms.forEach { it.pokemon = this }
-        pokemonRepositories.save(pokemon).logInfo(log, "Saved the Pokemon: ${pokemon.name}")
+        pokemonRepositories.save(pokemon)
+            .pokemonToDto()
+            .logInfo(log, "Saved the Pokemon: ${pokemon.name}")
     }
 
     fun getFromRange(start: Int, end: Int) = when {
@@ -59,6 +63,7 @@ class PokemonServices(
 
     fun getFromDbOnly(start: Int, limit: Int) =
         pokemonRepositories.findAll(OffsetBasedPageRequest(limit, start))
+            .map { it.pokemonToDto() }
             .logInfo(log, "Getting Pokemon form db")
 
     fun getAllSorted(start: Int, limit: Int, sort: Int, field: Fields) =
@@ -72,14 +77,16 @@ class PokemonServices(
                         -1 -> Sort.Direction.DESC
                         else -> throw NotFoundException("sort field can have to value 1:ASC -1:DESC")
                     },
-                    when (field){
+                    when (field) {
                         Fields.HEIGHT -> field.value
                         Fields.WEIGHT -> field.value
                         Fields.BASE_EXPERIENCE -> field.value
                     }
                 )
             )
-        )
+        ).map {
+            it.pokemonToDto()
+        }.logInfo(log, "Getting the sorted list")
 
 
 }

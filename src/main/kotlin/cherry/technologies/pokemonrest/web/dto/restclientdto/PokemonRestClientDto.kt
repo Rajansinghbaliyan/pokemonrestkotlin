@@ -1,6 +1,6 @@
-package cherry.technologies.pokemonrest.web.dto
+package cherry.technologies.pokemonrest.web.dto.restclientdto
 
-data class PokemonDto(
+data class PokemonRestClientDto(
     val id:Int,
     val name:String,
     val height:Int,
