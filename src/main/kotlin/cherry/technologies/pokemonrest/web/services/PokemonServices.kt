@@ -9,6 +9,7 @@ import cherry.technologies.pokemonrest.web.dto.dtoToPokemon
 import cherry.technologies.pokemonrest.web.repositories.PokemonRepositories
 import cherry.technologies.pokemonrest.web.utils.getPokemon
 import cherry.technologies.pokemonrest.web.utils.logInfo
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.logging.Logger
@@ -53,6 +54,13 @@ class PokemonServices(
             .map {
             getSinglePokemon(it)
         }
+    }
+
+    fun getFromDbOnly(start:Int,end: Int) = when {
+        start < 0 -> throw BadRequestException("start can't be less than 0.")
+        start > end -> throw BadRequestException("start should be greater than end.")
+        start == end -> throw BadRequestException("start and end are equal.")
+        else -> pokemonRepositories.findByIdBetween(start, end)
     }
 
 }

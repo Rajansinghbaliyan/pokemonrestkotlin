@@ -20,4 +20,10 @@ class PokemonControllers(private val pokemonServices: PokemonServices) {
         @RequestParam @NotNull start:Int,
         @RequestParam @NotNull end:Int,
         ) = pokemonServices.getFromRange(start,end)
+
+    @GetMapping("/range/db")
+    fun getFromDbInRange(
+        @RequestParam @NotNull start:Int,
+        @RequestParam @NotNull end:Int,
+    ) = pokemonServices.getFromDbOnly(start, end)
 }
