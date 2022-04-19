@@ -4,12 +4,11 @@ import cherry.technologies.pokemonrest.domain.Pokemon
 import cherry.technologies.pokemonrest.web.GetRestTemplate
 import cherry.technologies.pokemonrest.web.customexception.BadRequestException
 import cherry.technologies.pokemonrest.web.customexception.NotFoundException
-import cherry.technologies.pokemonrest.web.dto.PokemonDto
 import cherry.technologies.pokemonrest.web.dto.dtoToPokemon
 import cherry.technologies.pokemonrest.web.repositories.PokemonRepositories
+import cherry.technologies.pokemonrest.web.utils.OffsetBasedPageRequest
 import cherry.technologies.pokemonrest.web.utils.getPokemon
 import cherry.technologies.pokemonrest.web.utils.logInfo
-import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.logging.Logger
@@ -27,11 +26,11 @@ class PokemonServices(
     fun getSinglePokemon(id: Int): Pokemon {
         val result = pokemonRepositories.findByIdOrNull(id) ?: run {
             val url = BASE_URL + id
-            val pokemonDto = getPokemon(restTemplate, url).body.logInfo(log,"Fetching from API PokemonId: $id")
+            val pokemonDto = getPokemon(restTemplate, url).body.logInfo(log, "Fetching from API PokemonId: $id")
                 ?: throw NotFoundException("error in fetching")
             saveToDb(pokemonDto.dtoToPokemon())
         }
-        return result.logInfo(log,"GET Pokemon:${result.name}")
+        return result.logInfo(log, "GET Pokemon:${result.name}")
     }
 
 
@@ -44,7 +43,7 @@ class PokemonServices(
         pokemonRepositories.save(pokemon).logInfo(log, "Saved the Pokemon: ${pokemon.name}")
     }
 
-    fun getFromRange(start:Int, end:Int) = when {
+    fun getFromRange(start: Int, end: Int) = when {
         start < 0 -> throw BadRequestException("start can't be less than 0.")
         start > end -> throw BadRequestException("start should be greater than end.")
         start == end -> throw BadRequestException("start and end are equal.")
@@ -52,15 +51,12 @@ class PokemonServices(
             .toList()
             .parallelStream()
             .map {
-            getSinglePokemon(it)
-        }
+                getSinglePokemon(it)
+            }
     }
 
-    fun getFromDbOnly(start:Int,end: Int) = when {
-        start < 0 -> throw BadRequestException("start can't be less than 0.")
-        start > end -> throw BadRequestException("start should be greater than end.")
-        start == end -> throw BadRequestException("start and end are equal.")
-        else -> pokemonRepositories.findByIdBetween(start, end)
-    }
+    fun getFromDbOnly(start: Int, limit: Int) =
+        pokemonRepositories.findAll(OffsetBasedPageRequest(limit, start))
+        .logInfo(log,"Getting Pokemon form db")
 
 }
