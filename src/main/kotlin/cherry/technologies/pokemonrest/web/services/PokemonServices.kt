@@ -9,6 +9,7 @@ import cherry.technologies.pokemonrest.web.dto.restclientdto.restClientDtoToPoke
 import cherry.technologies.pokemonrest.web.dto.restdto.PokemonDto
 import cherry.technologies.pokemonrest.web.dto.restdto.pokemonToDto
 import cherry.technologies.pokemonrest.web.repositories.PokemonRepositories
+import cherry.technologies.pokemonrest.web.services.types.PokemonTypeAndName
 import cherry.technologies.pokemonrest.web.utils.OffsetBasedPageRequest
 import cherry.technologies.pokemonrest.web.utils.getPokemon
 import cherry.technologies.pokemonrest.web.utils.logInfo
@@ -94,10 +95,6 @@ class PokemonServices(
     @Transactional
     fun getNoOfByType() =
         pokemonRepositories.streamAll()
-//            .map {
-//                it.logInfo(log, "Get Pokemon: Id=${it.id} Name:${it.name}")
-//                it.pokemonToDto()
-//            }
             .flatMap { pokemon ->
                 pokemon.pokemonToDto()
                     .types.stream().map {
@@ -107,14 +104,8 @@ class PokemonServices(
             .collect(
                 groupingBy(
                     PokemonTypeAndName::type,
-//                    mapping(
-//                        {pokemon -> pokemon.name},
-//                        toSet()
-//                    )
-                counting()
+                    counting()
                 )
-            )
+            ) ?: throw NotFoundException("Database is empty")
 }
-
-class PokemonTypeAndName(val type: String?, val name: String?)
 
