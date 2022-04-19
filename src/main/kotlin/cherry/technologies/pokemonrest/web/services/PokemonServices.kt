@@ -9,6 +9,7 @@ import cherry.technologies.pokemonrest.web.dto.restclientdto.restClientDtoToPoke
 import cherry.technologies.pokemonrest.web.dto.restdto.PokemonDto
 import cherry.technologies.pokemonrest.web.dto.restdto.pokemonToDto
 import cherry.technologies.pokemonrest.web.repositories.PokemonRepositories
+import cherry.technologies.pokemonrest.web.services.types.PokemonMovesAndName
 import cherry.technologies.pokemonrest.web.services.types.PokemonTypeAndName
 import cherry.technologies.pokemonrest.web.utils.OffsetBasedPageRequest
 import cherry.technologies.pokemonrest.web.utils.getPokemon
@@ -127,5 +128,19 @@ class PokemonServices(
                     )
                 )
             )
+
+    @Transactional
+    fun countNoOfMovesPerPokemon() =
+        pokemonRepositories
+            .streamAll()
+            .map { pokemon ->
+                PokemonMovesAndName(
+                    pokemon.name,
+                    pokemon.types.map { it.name },
+                    pokemon.moves.count()
+                ).logInfo(log,"Mapping Pokemon ${pokemon.name}")
+            }
+            .sorted()
+            .collect(toList())
 }
 

@@ -38,4 +38,7 @@ class PokemonControllers(private val pokemonServices: PokemonServices) {
 
     @GetMapping("/type/name")
     fun getTypeAndNames() = pokemonServices.getTypeAndNameOfPokemon().responseOk()
+
+    @GetMapping("/moves")
+    fun getMovesPerPokemon() = pokemonServices.countNoOfMovesPerPokemon().responseOk()
 }
