@@ -2,8 +2,8 @@ package cherry.technologies.pokemonrest.web.controllers
 
 import cherry.technologies.pokemonrest.enums.Fields
 import cherry.technologies.pokemonrest.web.services.PokemonServices
+import cherry.technologies.pokemonrest.web.utils.responseOk
 import org.jetbrains.annotations.NotNull
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -11,32 +11,28 @@ import org.springframework.web.bind.annotation.*
 class PokemonControllers(private val pokemonServices: PokemonServices) {
 
     @GetMapping("/{id}")
-    fun getSinglePokemon(@PathVariable id: Int) =
-        ResponseEntity.ok()
-            .body(pokemonServices.getSinglePokemon(id))
+    fun getSinglePokemon(@PathVariable id: Int) = pokemonServices.getSinglePokemon(id).responseOk()
 
     @GetMapping("/range")
     fun getPokemonInRange(
         @RequestParam @NotNull start: Int,
         @RequestParam @NotNull end: Int,
-    ) = ResponseEntity.ok()
-        .body(pokemonServices.getFromRange(start, end))
+    ) = pokemonServices.getFromRange(start, end).responseOk()
 
     @GetMapping("/range/db")
     fun getFromDbInRange(
         @RequestParam @NotNull start: Int,
         @RequestParam @NotNull limit: Int,
-    ) = ResponseEntity
-        .ok()
-        .body(pokemonServices.getFromDbOnly(start, limit))
+    ) = pokemonServices.getFromDbOnly(start, limit).responseOk()
 
     @GetMapping("/range/db/sort")
     fun getAllSortedDb(
         @RequestParam @NotNull start: Int,
         @RequestParam @NotNull limit: Int,
         @RequestParam @NotNull direction: Int,
-        @RequestParam @NotNull field:Fields
-    ) = ResponseEntity
-        .ok()
-        .body(pokemonServices.getAllSorted(start,limit,direction,field))
+        @RequestParam @NotNull field: Fields
+    ) = pokemonServices.getAllSorted(start, limit, direction, field).responseOk()
+
+    @GetMapping("/type")
+    fun getCountByType() = pokemonServices.getNoOfByType().responseOk()
 }

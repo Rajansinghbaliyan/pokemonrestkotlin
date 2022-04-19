@@ -15,7 +15,10 @@ import cherry.technologies.pokemonrest.web.utils.logInfo
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.logging.Logger
+import java.util.stream.Collectors.counting
+import java.util.stream.Collectors.groupingBy
 
 const val BASE_URL = "https://pokeapi.co/api/v2/pokemon/"
 
@@ -88,6 +91,30 @@ class PokemonServices(
             it.pokemonToDto()
         }.logInfo(log, "Getting the sorted list")
 
-
+    @Transactional
+    fun getNoOfByType() =
+        pokemonRepositories.streamAll()
+//            .map {
+//                it.logInfo(log, "Get Pokemon: Id=${it.id} Name:${it.name}")
+//                it.pokemonToDto()
+//            }
+            .flatMap { pokemon ->
+                pokemon.pokemonToDto()
+                    .types.stream().map {
+                        PokemonTypeAndName(it, pokemon.name).logInfo(log, "Mapping Pokemon: ${pokemon.name}")
+                    }
+            }
+            .collect(
+                groupingBy(
+                    PokemonTypeAndName::type,
+//                    mapping(
+//                        {pokemon -> pokemon.name},
+//                        toSet()
+//                    )
+                counting()
+                )
+            )
 }
+
+class PokemonTypeAndName(val type: String?, val name: String?)
 
